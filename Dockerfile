@@ -1,24 +1,33 @@
-FROM php:8.1-apache
+FROM python:3.11-slim
 
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip bash && \
-    pip3 install flask --break-system-packages && \
-    apt-get clean
+    pip install flask && \
+    apt-get install -y cron
+
+WORKDIR /app
 
 RUN mkdir -p /home/www-data && \
-    mkdir /var/www/html/uploads && \
-    chown -R www-data:www-data /var/www/html/uploads && \
+    mkdir /app/uploads && \
+    chown -R www-data:www-data /app/uploads && \
     echo "You got a user flag!" > /home/www-data/user.txt && \
+    echo "You got a root flag!" > /root/root.txt && \
     chown -R www-data:www-data /home/www-data
-    
-RUN a2enmod rewrite
 
-COPY . /var/www/html
+RUN touch /var/backups/backup.sh && \
+    chmod +x /var/backups/backup.sh && \
+    chown www-data:www-data /var/backups/backup.sh && \
+    echo "* * * * * root bash /var/backups/backup.sh" > /etc/cron.d/backup-job && \
+    chmod 0644 /etc/cron.d/backup-job && \
+    crontab /etc/cron.d/backup-job
 
-WORKDIR /var/www/html/
+COPY /scripts/start.sh /root/start.sh
+RUN chmod +x /root/start.sh
 
-EXPOSE 8080
+COPY . /app
 
-USER www-data
+RUN chown -R www-data:www-data /app && \
+    chown -R root:root /app/scripts
 
-CMD service apache2 start && python3 app.py
+EXPOSE 5000
+
+CMD ["/bin/bash", "/root/start.sh"]
