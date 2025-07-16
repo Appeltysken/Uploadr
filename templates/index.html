@@ -3,126 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Фотогалерея</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      background-color: #f7f5f2; /* очень светлый пастельный фон */
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      color: #555; /* мягкий серо-коричневый */
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    header {
-      padding: 20px;
-      font-weight: 600;
-      font-size: 1.4rem;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
-      background-color: #fff;
-    }
-
-    main {
-      flex-grow: 1;
-      max-width: 900px;
-      margin: 30px auto 50px;
-      padding: 0 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .gallery {
-      width: 100%;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-
-    .gallery-item {
-      background-color: #fff;
-      border: 1px solid #e0dfdc;
-      border-radius: 8px;
-      height: 140px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2rem;
-      color: #a7a49d;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.25s ease;
-    }
-    
-    .gallery-item a {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .gallery-item.add-photo:hover {
-      background-color: #e6e2db;
-      color: #7d7a72;
-    }
-
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      border-radius: 8px;
-      object-fit: cover;
-      pointer-events: none;
-      user-select: none;
-    }
-
-    input[type="file"] {
-      display: none;
-    }
-
-  </style>
+  <title>Gallery</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-  <header>
-    Фотогалерея
-  </header>
+<header>Your Gallery</header>
 
-  <main>
-    <form id="uploadForm" action="/" method="post" enctype="multipart/form-data">
-      <input type="file" name="file" id="fileInput" accept="image/*" onchange="uploadImage()" />
-      <div class="gallery">
-        <div class="gallery-item add-photo" onclick="document.getElementById('fileInput').click();">+</div>
+<main>
+  <form id="uploadForm" action="/" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" id="fileInput" onchange="uploadImage()" />
+    <div class="gallery">
+      <div class="gallery-item add-photo" onclick="document.getElementById('fileInput').click();">+</div>
+      {% for image in images %}
+        <div class="gallery-item">
+          <a href="{{ url_for('uploaded_file', filename=image) }}" target="_blank">
+            <img src="{{ url_for('uploaded_file', filename=image) }}" alt="{{ image }}">
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </form>
+</main>
 
-        {% for image in images %}
-          <div class="gallery-item">
-            <a href="{{ url_for('uploaded_file', filename=image) }}" target="_blank">
-              <img src="{{ url_for('uploaded_file', filename=image) }}" alt="{{ image }}" />
-            </a>
-          </div>
-        {% endfor %}
-      </div>
-    </form>
-
-  </main>
-
-  <script>
-    function uploadImage() {
-      const form = document.getElementById('uploadForm');
-      const gallery = document.querySelector('.gallery');
-
-      const pending = document.createElement('div');
-      pending.className = 'gallery-item pending';
-      gallery.insertBefore(pending, gallery.children[1]);
-
-      form.submit();
-    }
-  </script>
-
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
