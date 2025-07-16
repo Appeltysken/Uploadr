@@ -1,25 +1,42 @@
 from flask import Flask, request, redirect, render_template, send_from_directory, url_for
 import os
+import subprocess
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@app.route('/', methods=['GET'])
+ALLOWED_IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp')
+
+def sanitized(filename):
+    return os.path.splitext(filename.lower())[1] in ALLOWED_IMAGE_EXTENSIONS
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    images = [f for f in os.listdir(app.config['UPLOAD_FOLDER']) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
-    return render_template('index.html', images=images)
+    if request.method == 'POST':
+        file = request.files.get('file')
+        if file and file.filename:
+            filename = file.filename
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
 
-@app.route('/', methods=['POST'])
-def upload():
-    file = request.files.get('file')
-    if file and file.filename != '':
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-    return redirect(url_for('index'))
+            if sanitized(filename):
+                file.save(filepath)
+                return redirect(url_for('index'))
+            else:
+                return "Разрешено загружать только изображения.", 400
+
+    images = sorted([
+        f for f in os.listdir(UPLOAD_FOLDER)
+        if sanitized(f)
+    ])
+    return render_template('index.html', images=images)
 
 @app.route('/uploads/<filename>', endpoint='uploaded_file')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
