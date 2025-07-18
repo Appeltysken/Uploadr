@@ -1,5 +1,11 @@
 FROM python:3.11-slim
 
+LABEL maintainer="normanrey" \
+      version="1.0" \
+      description="Minimal Flask-based image upload lab with reverse shell and cron-based privilege escalation" \
+      repository="https://github.com/Appeltysken/Uploadr" \
+      challenge.type="CTF"
+
 RUN apt-get update && \
     pip install flask && \
     apt-get install -y cron
