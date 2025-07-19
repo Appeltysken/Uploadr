@@ -7,7 +7,6 @@ LABEL maintainer="normanrey" \
       challenge.type="CTF"
 
 RUN apt-get update && \
-    pip install flask && \
     apt-get install -y cron
 
 WORKDIR /app
@@ -30,6 +29,8 @@ COPY /scripts/start.sh /root/start.sh
 RUN chmod +x /root/start.sh
 
 COPY . /app
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chown -R www-data:www-data /app && \
     chown -R root:root /app/scripts
