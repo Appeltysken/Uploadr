@@ -27,7 +27,7 @@ def index():
 
     images = sorted([
         f for f in os.listdir(UPLOAD_FOLDER)
-        if sanitized(f)
+        if sanitized(f) and '.py' not in f.lower()
     ])
     return render_template('index.html', images=images)
 
